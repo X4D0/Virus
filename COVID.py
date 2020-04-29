@@ -71,8 +71,6 @@ class Individu:
         else:
             orang.deltax = (orang.x - orang.posisix)
             orang.deltay = (orang.y - orang.posisiy)
-        print("Set Pos. Individu-",orang.id," (",orang.x,orang.y,")")
-
     def get_pos(orang):
         return (orang.posisix,orang.posisiy)
     
@@ -121,7 +119,7 @@ class Individu:
 n = 200  # Banyak nya Individu 200
 r_infeksi = 5  # Rasio individu terinfeksi 5%
 p_bergerak = 80  # Probabilitas individu bergerak 80%
-t_pulih = 10   #time taken to recover in number of frames (0-infinity)
+t_pulih = 10   #Waktu pemulihan
 
 terinfeksi = 0
 individu = []
@@ -130,6 +128,7 @@ individu = []
 for i in range(n):
     p = Individu(i, np.random.randint(low=0, high=20), np.random.randint(low=0, high=20), 
                 np.random.randint(low=0, high=20), np.random.randint(low=0, high=20),t_pulih, False)
+
 
     if np.random.rand()<r_infeksi/100:
         p.infeksi(0)
@@ -146,15 +145,15 @@ fig = plt.figure(figsize=(18,9))
 ax = fig.add_subplot(1,2,1)
 cx = fig.add_subplot(1,2,2)
 ax.axis('off')
-cx.axis([0,100,0,n])
+cx.axis([0,50,0,n])
 
 scatt = ax.scatter([p.posisix for p in individu], [p.posisiy for p in individu],c='blue',s=8)
 ruang = plt.Rectangle((0,0),20,20,fill=False)
 ax.add_patch(ruang)
 
-cvst,=cx.plot(terinfeksi,color="red",label="Terinfeksi")
-rvst,=cx.plot(terinfeksi,color="blue",label="Sembuh")
-cx.legend(handles=[rvst,cvst])
+grafik1,=cx.plot(terinfeksi,color="red",label="Terinfeksi")
+grafik2,=cx.plot(terinfeksi,color="blue",label="Sembuh")
+cx.legend(handles=[grafik2,grafik1])
 cx.set_xlabel("Waktu")
 cx.set_ylabel("Populasi")
 
@@ -165,7 +164,6 @@ t = [0]
 
 # Fungsi update Posisi tiap individu per Frame (Agar pergerakan dapat di trace)
 def update(frame,smb,inf,t):
-    waktu = 0
     infected = 0
     recover = 0
     warna = []
@@ -192,6 +190,10 @@ def update(frame,smb,inf,t):
                         org.infeksi(frame)
 
         warna.append(p.get_warna()) # Warna tiap individu menggambarkan status kesehatannya
+
+    # print (infected);
+    print("Hari ke",frame,":",int(infected),"Terinfeksi")
+
     
     # Update Plotting
     smb.append(recover)
@@ -202,11 +204,12 @@ def update(frame,smb,inf,t):
     offsets = np.array([[p.posisix for p in individu], [p.posisiy for p in individu]])
     scatt.set_offsets(np.ndarray.transpose(offsets))
     scatt.set_color(warna)
-    cvst.set_data(t,inf)
-    rvst.set_data(t,smb)
-    return scatt,cvst,rvst
+    grafik1.set_data(t,inf)
+    grafik2.set_data(t,smb)
+    return scatt,grafik1,grafik2
 
-#run the animation indefinitely
+#Menjalankan Animasi
+
 animation = FuncAnimation(fig, update, interval=10,fargs=(smb,inf,t),blit=True)
 plt.title("Penyebaran Virus")
 plt.show()
